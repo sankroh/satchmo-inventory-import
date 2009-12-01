@@ -1,0 +1,25 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Refresh inventory {{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+    <div class="breadcrumbs">
+        <a href="../../">Home</a> &rsaquo;
+        Refresh inventory
+    </div>
+{% endblock %}
+
+{% block content %}
+	<div id="content-main">
+		{% if form.errors %}
+		<p class="error">{{ form.errors }}</p>
+		{% endif %}
+		<h1>Refresh product inventory</h1>
+		<h3>Please upload a CSV file with two columns.</h3>
+		<p>Column titles must be <em>"sfs_upcnum_v"</em> for the SKU and <em>"sfuqoh_v"</em> for inventory number</p>
+		<form enctype="multipart/form-data" action="{% url admin_inventory_import %}" method="POST">
+		{{ form.as_p }}
+		<input type="submit" value="Upload" />
+		</form>
+	</div>
+{% endblock %}
