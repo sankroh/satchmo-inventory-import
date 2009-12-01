@@ -9,38 +9,50 @@
     </div>
 {% endblock %}
 
+{% block extrahead %}
+	{{ block.super }}
+	<script src="{{ static_url }}js/collapsed.js" type="text/javascript"></script>
+{% endblock %}
+
+{% block bodyclass %}change-form{% endblock %}
+
 {% block content %}
-	<h1>RESULTS FOR IMPORT OF {{ model_for_import }} DATA:</h1>
-	Rows in spreadsheet: {{ num_rows_in_spreadsheet }}<br/>
-	User specified start row: {{ start_row }}<br/>
-	User specified end row: {{ end_row }}<br/>
-	<br/>
-	<h2>Summary</h2>
-	Number of rows successfully processed: {{ num_rows_processed }}<br/>
-	Number of rows imported: {{ num_items_imported }}<br/>
-	Number of rows updated: {{ num_items_updated }}<br/>
-	Number of errors: {{ num_errors }}<br/>
-	<br/>
-	<br/>
-	<h2>Details</h2>
-	Combined Results (All Messages in Order):<br/>
-	{% for result in combined_results_messages %}
-	{{ result }}<br/>
-	{% endfor %}
-	<br/><br/>
-	Imports Only:<br/>
-	{% for result in import_results_messages %}
-	{{ result }}<br/>
-	{% endfor %}
-	<br/><br/>
-	Updates Only:<br/>
-	{% for result in update_results_messages %}
-	{{ result }}<br/>
-	{% endfor %}
-	<br/><br/>
-	Errors Only:<br/>
-	{% for result in error_results_messages %}
-	{{ result }}<br/>
-	{% endfor %}
-	<br/><br/>
+	<div id="content-main">
+		<h1>Inventory import results:</h1>
+		Rows in spreadsheet: {{ num_rows_in_spreadsheet }}<br/>
+		
+		<h2>Summary</h2>
+		Number of rows successfully processed: {{ num_rows_processed }}<br/>
+		Number of rows updated: {{ num_items_updated }}<br/>
+		Number of errors: {{ num_errors }}<br/>
+		<br/>
+		<br/>
+		<h2>Details</h2>
+		<fieldset class="module aligned collapse collapsed">
+			<h3>Combined Results (All Messages in Order):</h3>
+			{% for result in combined_results_messages %}
+			<div class="form-row combined">{{ result }}</div>
+			{% endfor %}
+		</fieldset>
+		<fieldset class="module aligned collapse collapsed">
+			<h3>Updates Only</h3>
+			{% if update_results_messages %}
+			{% for result in update_results_messages %}
+			<div class="form-row update">{{ result }}</div>		
+			{% endfor %}
+			{% else %}
+			<h4>No updates/imports were performed</h4>
+			{% endif %}
+		</fieldset>
+		<fieldset class="module aligned collapse collapsed">
+			<h3>Errors Only:</h3>
+			{% if error_results_messages %}
+			{% for result in error_results_messages %}
+			<div class="form-row error">{{ result }}</div>
+			{% endfor %}
+			{% else %}
+			<h4>No errors were performed</h4>
+			{% endif %}
+		</fieldset>
+	</div>
 {% endblock %}

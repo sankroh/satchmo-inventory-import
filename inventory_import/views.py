@@ -39,21 +39,23 @@ def upload(request, extra_context=None):
 	status_dict = {}
 	status_dict['update_results_messages'] = []
 	status_dict['error_results_messages'] = []
+	status_dict['num_rows_in_spreadsheet'] = 0
 	status_dict['num_rows_processed'] = 0
 	status_dict['num_items_updated'] = 0
 	status_dict['num_errors'] = 0
+	status_dict['combined_results_messages'] = []
+	index = 0
 	if request.method == 'POST':
 		form = UploadImportFileForm(request.POST, request.FILES)
 		if form.is_valid():
 			save_file_name = process_import_file(form.cleaned_data['import_file'], request.session, IMPORT_TEMPFILE_LOCATION)
-			import pdb
-			pdb.set_trace()
 			try:
 				product_data = csv_to_dict(os.path.join(IMPORT_TEMPFILE_LOCATION, save_file_name))
 			except IOError:
 				status_dict['error_results_messages'].append('Error opening CSV file: '+ `sys.exc_info()[1]`)
 				return _render_results_response(request, status_dict, extra_context)
 			
+			status_dict['num_rows_in_spreadsheet'] = len(product_data)
 			site = Site.objects.get_current()
 			#TODO Make this more efficient!!
 			for index, row in enumerate(product_data):
@@ -64,9 +66,13 @@ def upload(request, extra_context=None):
 					pv.product.items_in_stock = inventory
 					pv.product.save()
 					status_dict['update_results_messages'].append('Updated inventory for: '+ sku)
+					status_dict['combined_results_messages'].append('Updated inventory for: '+ sku)
+					status_dict['num_items_updated'] += 1
 				except ObjectDoesNotExist or ProductVariation.MultipleObjectsReturned:
 					status_dict['error_results_messages'].append('Invalid or redundant sku : '+ sku)
+					status_dict['combined_results_messages'].append('Invalid or redundant sku : '+ sku)
 			
+			status_dict['num_rows_processed'] = index + 1
 			filepath = os.path.join(IMPORT_TEMPFILE_LOCATION, save_file_name)
 			if os.path.isfile(filepath):
 				os.remove(filepath)
